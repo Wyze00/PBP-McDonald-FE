@@ -1,15 +1,15 @@
-import { useMemo, type PropsWithChildren } from 'react';
+import { useCallback, useEffect, useMemo, type PropsWithChildren } from 'react';
 import { Link, useLocation } from 'react-router';
 import logo from '../assets/logo.png';
 import Footer from './Footer';
-
-function getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? decodeURIComponent(match[2]) : null;
-}
+import type { LoginResponse } from '../types/login.type';
+import { useAppDispatch } from '../hooks/useAppDispatch';
+import { userSlice } from '../redux/user.slice';
+import { useAppSelector } from '../hooks/useAppSelector';
 
 export default function Header(pwc: PropsWithChildren): React.JSX.Element {
     const location = useLocation();
+    const dispatch = useAppDispatch();
 
     const breadcrumb = useMemo(() => {
         const segments = location.pathname.split('/').filter(Boolean);
@@ -19,7 +19,46 @@ export default function Header(pwc: PropsWithChildren): React.JSX.Element {
             .join(' > ');
     }, [location.pathname]);
 
-    const isAuthenticated = useMemo(() => Boolean(getCookie('token')), [location.pathname]);
+
+    useEffect(() => {
+
+        const authenticate = async () => {
+
+            const response = await fetch('/api/auth/status', {
+                method: 'GET',
+                credentials: 'include',
+            })
+
+            const result: LoginResponse = await response.json();
+
+            if (response.status == 200 && result.data) {
+                dispatch(userSlice.actions.setState(result.data));
+            }
+        }
+
+        authenticate();
+    }, [])
+
+    const handleLogout = useCallback(() => {
+        const logout = async () => {
+
+            const response = await fetch('/api/auth/logout', {
+                method: 'DELETE',
+                credentials: 'include'
+            })
+
+            if (response.status == 200) {
+                dispatch(userSlice.actions.resetState());
+            }
+        }
+
+        logout();
+    }, [])
+
+    const user = useAppSelector((state) => state.user);
+    const isAuthenticated = useMemo(() => {
+        return user.username !== '';
+    }, [user.username]);
 
     return (
         <>
@@ -45,12 +84,12 @@ export default function Header(pwc: PropsWithChildren): React.JSX.Element {
 
                     {/* Tombol Logout */}
                     {isAuthenticated && (
-                        <Link
-                            to="/logout"
+                        <button
+                            onClick={handleLogout}
                             className="rounded-full px-6 py-2 bg-white text-[#DA291C] font-bold hover:bg-yellow-400 hover:text-black transition-all duration-200 shadow-md"
                         >
                             Logout
-                        </Link>
+                        </button>
                     )}
                 </div>
             </header>

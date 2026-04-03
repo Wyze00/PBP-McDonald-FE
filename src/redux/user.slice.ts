@@ -17,7 +17,13 @@ export const userSlice = createSlice({
     reducers: {
         setState: (_, action: UserSliceAction) => {
             return action.payload;
-        } 
+        },
+        resetState: () => {
+            return {
+                username: '',
+                role: ''
+            };
+        },
     },
     selectors: {
         getRole: (state: User) => {

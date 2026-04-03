@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import bgImage from '../assets/image1.png';
 import type { LoginResponse } from '../types/login.type';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { userSlice } from '../redux/user.slice';
+import { useAppSelector } from '../hooks/useAppSelector';
 
 export default function LoginPage(): React.JSX.Element {
     const [username, setUsername] = useState('');
@@ -19,19 +20,18 @@ export default function LoginPage(): React.JSX.Element {
         setError('');
 
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
 
             const result: LoginResponse = await response.json();
-
-            if (response.ok && result.data) {
-
+  
+            if (response.status === 200 && result.data) {
                 dispatch(userSlice.actions.setState(result.data));
-
-                if (result.data.role === 'admin') {
+                
+                if (result.data.role.toLowerCase() === 'admin') {
                     navigate('/admin');
                 } else {
                     navigate('/kitchen');
