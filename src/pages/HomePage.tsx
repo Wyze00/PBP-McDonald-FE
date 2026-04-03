@@ -11,14 +11,14 @@ const menus = [
   },
   {
     name: "Admin",
-    path: "/admin",
+    path: "/login",
     desc: "Manage products and store",
     icon: "⚙️",
     color: "bg-gray-200"
   },
   {
     name: "Kitchen",
-    path: "/kitchen",
+    path: "/login",
     desc: "Prepare incoming orders",
     icon: "🍳",
     color: "bg-gray-200"

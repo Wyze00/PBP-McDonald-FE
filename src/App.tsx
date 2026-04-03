@@ -5,6 +5,7 @@ import { store } from "./redux/store";
 import Header from "./components/Header";
 
 const HomePage = lazy(() => import('./pages/HomePage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 export default function App(): React.JSX.Element {
@@ -14,6 +15,7 @@ export default function App(): React.JSX.Element {
           <Header>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="*" element= {<NotFound />} />
             </Routes>
           </Header>
