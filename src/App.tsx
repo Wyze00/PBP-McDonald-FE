@@ -4,10 +4,14 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { store } from "./redux/store";
 import Header from "./components/Header";
 import PublicRoute from "./middlewares/public.middleware";
+import AdminMiddleware from "./middlewares/admin.middleware";
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const AdminHomePage = lazy(() => import('./pages/admin/AdminHomepage'));
+const AdminMenu = lazy(() => import('./pages/admin/AdminMenu'));
+const AdminTransaction = lazy(() => import('./pages/admin/AdminTransaction'));
 
 export default function App(): React.JSX.Element {
     return (
@@ -18,6 +22,11 @@ export default function App(): React.JSX.Element {
                 <Route path="/" element={<HomePage />} />
               <Route element={<PublicRoute />}>
                 <Route path="/login" element={<LoginPage />} />
+              </Route>
+              <Route element={<AdminMiddleware />}>
+                <Route path="/admin" element={<AdminHomePage />}/>
+                <Route path="/admin/menu" element={<AdminMenu />}/>
+                <Route path="/admin/transaction" element={<AdminTransaction />}/>
               </Route>
               <Route path="*" element= {<NotFound />} />
             </Routes>
