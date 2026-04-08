@@ -4,6 +4,8 @@ import type { Product } from "../../types/product.type";
 import type { ResponseData, ResponseError } from "../../types/response.type";
 import { useImmer } from "use-immer";
 import { customFetch } from "../../utilities/api";
+import ErrorBanner from "../../components/ErrorBanner";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 export default function AdminMenu(): React.JSX.Element {
     const [cip, setCip] = useImmer<CategoryIncludeProducts[]>([]);
@@ -217,40 +219,14 @@ export default function AdminMenu(): React.JSX.Element {
         setIsProductModalOpen(false);
     }, [])
 
-    useEffect(() => {
-    if (error) {
-        const timer = setTimeout(() => {
-            setError('');
-        }, 5000);
-
-        return () => clearTimeout(timer);
-    }
-}, [error]);
-
     return (
         <div className="min-h-screen flex flex-col bg-white">
 
-            {/* Error Banner */}
-            {error && (
-                <div className="fixed top-20 right-4 z-[100] bg-white text-red-600 px-4 py-2 rounded-lg shadow-md flex items-center gap-3 animate-fade-in">
-                    <span className="text-sm font-bold">⚠️ {error}</span>
-                    <button 
-                        onClick={() => setError('')} 
-                        className="hover:bg-red-50 p-1 rounded-md transition-colors text-black hover:text-red-600"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            )}
+            {/* Error */}
+            {error && <ErrorBanner error={error} setError={setError} />}
 
-            {/* Loading Overlay */}
-            {loading && (
-                <div className="fixed inset-0 z-[100] bg-white/50 backdrop-blur-[2px] flex items-center justify-center">
-                    <div className="w-12 h-12 border-4 border-[#DA291C] border-t-transparent rounded-full animate-spin"></div>
-                </div>
-            )}
+            {/* Loading */}
+            {loading && <LoadingOverlay />}
 
             <main className="flex-1 flex">
                 {/* Categories */}

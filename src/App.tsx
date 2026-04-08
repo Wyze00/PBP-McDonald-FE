@@ -11,6 +11,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const AdminHomePage = lazy(() => import('./pages/admin/AdminHomepage'));
 const AdminMenu = lazy(() => import('./pages/admin/AdminMenu'));
+const AdminTransaction = lazy(() => import('./pages/admin/AdminTransaction'));
 
 export default function App(): React.JSX.Element {
     return (
@@ -25,6 +26,7 @@ export default function App(): React.JSX.Element {
               <Route element={<AdminMiddleware />}>
                 <Route path="/admin" element={<AdminHomePage />}/>
                 <Route path="/admin/menu" element={<AdminMenu />}/>
+                <Route path="/admin/transaction" element={<AdminTransaction />}/>
               </Route>
               <Route path="*" element= {<NotFound />} />
             </Routes>
