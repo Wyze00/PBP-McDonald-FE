@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import bgImage from "../assets/image1.png";
+import bgImage from "../../assets/image1.png";
 
 const menus = [
   {
