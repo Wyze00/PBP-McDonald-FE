@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router';
-import bgImage from '../assets/image1.png';
-import type { LoginResponse } from '../types/login.type';
-import { useAppDispatch } from '../hooks/useAppDispatch';
-import { userSlice } from '../redux/user.slice';
-import { useAppSelector } from '../hooks/useAppSelector';
+import { Link, useNavigate } from 'react-router';
+import bgImage from '../../assets/image1.png';
+import type { LoginResponse } from '../../types/login.type';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { userSlice } from '../../redux/user.slice';
+import ErrorBanner from '../../components/ErrorBanner';
+import LoadingOverlay from '../../components/LoadingOverlay';
 
 export default function LoginPage(): React.JSX.Element {
     const [username, setUsername] = useState('');
@@ -50,6 +51,9 @@ export default function LoginPage(): React.JSX.Element {
     return (
         <div className="min-h-screen flex flex-col bg-white">
 
+            {error && <ErrorBanner error={error} setError={setError} />}
+            {loading && <LoadingOverlay />}
+
             <main className="flex-1 flex items-center justify-center p-4 md:p-10 pt-28">
                 <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-[2rem] shadow-2xl overflow-hidden min-h-[500px]">
                     
@@ -71,12 +75,6 @@ export default function LoginPage(): React.JSX.Element {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {error && (
-                                <div className="bg-red-100 text-red-600 p-3 rounded-lg text-sm font-medium border border-red-200">
-                                    {error}
-                                </div>
-                            )}
-
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Username</label>
                                 <input
@@ -106,12 +104,16 @@ export default function LoginPage(): React.JSX.Element {
                                 disabled={loading}
                                 className="w-full bg-[#DA291C] text-white font-bold py-4 rounded-xl shadow-lg shadow-red-200 hover:bg-[#C82115] transform hover:scale-[1.02] active:scale-95 transition-all flex justify-center items-center"
                             >
-                                {loading ? (
-                                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                ) : (
-                                    "SIGN IN"
-                                )}
+                                SIGN IN
                             </button>
+
+                            <div className="mt-4 text-center">
+                                <Link to="/reset-password"
+                                    className="text-sm font-bold text-gray-400 hover:text-[#DA291C] transition-colors"
+                                >
+                                    Forgot Password?
+                                </Link>
+                            </div>
                         </form>
                     </div>
                 </div>

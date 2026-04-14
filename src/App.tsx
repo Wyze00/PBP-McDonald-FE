@@ -6,9 +6,11 @@ import Header from "./components/Header";
 import PublicRoute from "./middlewares/public.middleware";
 import AdminMiddleware from "./middlewares/admin.middleware";
 
-const HomePage = lazy(() => import('./pages/HomePage'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+const HomePage = lazy(() => import('./pages/public/HomePage'));
+const LoginPage = lazy(() => import('./pages/public/LoginPage'));
+const ResetPasswordPage = lazy(() => import('./pages/public/ResetPasswordPage'));
+const ResetPasswordVerifyPage = lazy(() => import('./pages/public/ResetPasswordVerifyPage'));
+const NotFound = lazy(() => import('./pages/public/NotFound'));
 const AdminHomePage = lazy(() => import('./pages/admin/AdminHomepage'));
 const AdminMenu = lazy(() => import('./pages/admin/AdminMenu'));
 const AdminTransaction = lazy(() => import('./pages/admin/AdminTransaction'));
@@ -22,6 +24,8 @@ export default function App(): React.JSX.Element {
                 <Route path="/" element={<HomePage />} />
               <Route element={<PublicRoute />}>
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/reset-password/verify" element={<ResetPasswordVerifyPage />} />
               </Route>
               <Route element={<AdminMiddleware />}>
                 <Route path="/admin" element={<AdminHomePage />}/>
