@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { customFetch } from "../../utilities/api";
+import ErrorBanner from "../../components/ErrorBanner";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import type { ResponseData, ResponseError } from "../../types/response.type";
 
 interface Order {
   id: string;
@@ -11,40 +14,66 @@ interface Order {
 export default function KitchenPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [tab, setTab] = useState<"active" | "completed">("active");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const statusFilter = tab === "active" ? "ready,ongoing" : "completed";
-      const response = await axios.get(`/api/order?status=${statusFilter}`, {
-        withCredentials: true,
-      });
-      setOrders(response.data.data);
-    } catch (error) {
-      console.error(error);
+      const response = await customFetch(`/api/orders?status=${statusFilter}`);
+      
+      if (response.ok) {
+        const { data } = await response.json() as ResponseData<Order[]>;
+        setOrders(data);
+      } else {
+        const { error } = await response.json() as ResponseError;
+        setError(error);
+      }
+    } catch (err) {
+      setError("Gagal memuat data pesanan.");
+      console.error(err);
+    } finally {
+      if (!silent) setLoading(false);
     }
   };
 
   const updateStatus = async (orderId: string, newStatus: string) => {
+    setLoading(true);
+    setError("");
     try {
-      await axios.put(
-        `/api/order/${orderId}`,
-        { status: newStatus },
-        { withCredentials: true }
-      );
-      fetchOrders();
-    } catch (error) {
-      console.error(error);
+      const response = await customFetch(`/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        fetchOrders(true);
+      } else {
+        const { error } = await response.json() as ResponseError;
+        setError(error);
+      }
+    } catch (err) {
+      setError("Gagal memperbarui status pesanan.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 10000);
+    const interval = setInterval(() => fetchOrders(true), 10000);
     return () => clearInterval(interval);
   }, [tab]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      {error && <ErrorBanner error={error} setError={setError} />}
+      {loading && <LoadingOverlay />}
       <header className="bg-white shadow-sm px-8 py-4 flex justify-between items-center z-10">
         <h1 className="text-3xl font-bold text-gray-800">
           Kitchen <span className="text-yellow-400">Display</span>

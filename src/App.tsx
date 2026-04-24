@@ -5,6 +5,7 @@ import { store } from "./redux/store";
 import Header from "./components/Header";
 import PublicRoute from "./middlewares/public.middleware";
 import AdminMiddleware from "./middlewares/admin.middleware";
+import KitchenMiddleware from "./middlewares/kitchen.middleware";
 
 const HomePage = lazy(() => import('./pages/public/HomePage'));
 const LoginPage = lazy(() => import('./pages/public/LoginPage'));
@@ -14,6 +15,7 @@ const NotFound = lazy(() => import('./pages/public/NotFound'));
 const AdminHomePage = lazy(() => import('./pages/admin/AdminHomepage'));
 const AdminMenu = lazy(() => import('./pages/admin/AdminMenu'));
 const AdminTransaction = lazy(() => import('./pages/admin/AdminTransaction'));
+const KitchenPage = lazy(() => import('./pages/kitchen/KitchenPage'));
 
 export default function App(): React.JSX.Element {
     return (
@@ -31,6 +33,9 @@ export default function App(): React.JSX.Element {
                 <Route path="/admin" element={<AdminHomePage />}/>
                 <Route path="/admin/menu" element={<AdminMenu />}/>
                 <Route path="/admin/transaction" element={<AdminTransaction />}/>
+              </Route>
+              <Route element={<KitchenMiddleware />}>
+                <Route path="/kitchen" element={<KitchenPage />}/>
               </Route>
               <Route path="*" element= {<NotFound />} />
             </Routes>
