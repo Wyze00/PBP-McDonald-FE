@@ -22,6 +22,7 @@ export default function AdminMenu(): React.JSX.Element {
         description: '',
         imageUrl: '',
         price: 0,
+        categoryId: '',
     });
 
     const [selectedCategory, setSelectedCategory] = useImmer<Category>({
@@ -65,6 +66,7 @@ export default function AdminMenu(): React.JSX.Element {
                 description: '',
                 imageUrl: '',
                 price: 0,
+                categoryId: '',
             })
         } else {
             setSelectedProduct(product);
@@ -208,14 +210,150 @@ export default function AdminMenu(): React.JSX.Element {
     }, []);
 
     const handleSaveProduct = useCallback((product: Product, categoryIndex: number) => {
-        // ! implement later
-        console.log(product, categoryIndex);
+        setError('');
+        setLoading(true);
+
+        if (product.id === '') {
+            
+            (async () => {
+                try {
+                    const response = await customFetch(`/api/products`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'Application/json'
+                        },
+                        body: JSON.stringify({
+                            name: product.name,
+                            price: product.price,
+                            description: product.description,
+                            imageUrl: product.imageUrl,
+                            categoryId: cip[categoryIndex].id
+                        }),
+                        credentials: 'include',
+                    })
+
+                    if (response.ok) {
+                        const { data } = await response.json() as ResponseData<Product>;
+
+                        setCip((draft: CategoryIncludeProducts[]) => {
+                            const index = draft.findIndex((category) => {
+                                return category.id === data.categoryId;
+                            });
+
+                            draft[index].products.push({
+                                id: data.id,
+                                name: data.name,
+                                price: data.price,
+                                description: data.description,
+                                imageUrl: data.imageUrl,
+                                categoryId: data.categoryId,
+                            })
+                        })
+
+                    } else {
+                        const { error } = await response.json() as ResponseError;
+                        setError(error);
+                    }  
+
+                } catch (error) {
+                    console.log(error);
+                    setError('Gagal create data category');
+                } finally {
+                    setLoading(false);
+                }
+            })()
+
+        } else {
+            (async () => {
+                try {
+                    const response = await customFetch(`/api/products/${product.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'Application/json'
+                        },
+                        body: JSON.stringify({
+                            name: product.name,
+                            price: product.price,
+                            description: product.description,
+                            imageUrl: product.imageUrl,
+                            categoryId: cip[categoryIndex].id,
+                        }),
+                        credentials: 'include',
+                    })
+
+                    if (response.ok) {
+                        const { data } = await response.json() as ResponseData<Product>;
+
+                        setCip((draft: CategoryIncludeProducts[]) => {
+
+                            const index = draft.findIndex((category) => {
+                                return category.id === data.categoryId;
+                            });
+
+                            const productIndex = draft[index].products.findIndex((draftProduct) => {
+                                return draftProduct.id === data.id;
+                            })
+
+                            draft[index].products[productIndex] = {
+                                id: data.id,
+                                name: data.name,
+                                price: data.price,
+                                description: data.description,
+                                imageUrl: data.imageUrl,
+                                categoryId: data.categoryId,
+                            };
+                        })
+                    } else {
+                        const { error } = await response.json() as ResponseError;
+                        setError(error);
+                    } 
+                    
+                } catch (error) {
+                    console.log(error);
+                    setError('Gagal update data category');
+                } finally {
+                    setLoading(false);
+                }
+            })()
+        }
+
         setIsProductModalOpen(false);
     }, [])
 
-    const handleDeleteProduct = useCallback((product: Product, categoryIndex: number) => {
-        // ! implement later
-        console.log(product, categoryIndex);
+    const handleDeleteProduct = useCallback((product: Product) => {
+        setError('');
+        setLoading(true);
+
+        (async () => {
+            try {
+                const response = await customFetch(`/api/products/${product.id}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                })
+
+                if (response.ok) {
+                    setCip((draft: CategoryIncludeProducts[]) => {
+                        const index = draft.findIndex((category) => {
+                            return category.id === product.categoryId;
+                        });
+
+                        const productIndex = draft[index].products.findIndex((draftProduct) => {
+                            return draftProduct.id === product.id;
+                        })
+                        console.log(draft[index].products[productIndex]);
+                        draft[index].products.splice(productIndex, 1);
+                    })
+                } else {
+                    const { error } = await response.json() as ResponseError;
+                    setError(error);
+                }
+            } catch (error) {
+                setError('Gagal menghapus data product');
+            } finally {
+                setLoading(false);
+            }
+        })()
+
         setIsProductModalOpen(false);
     }, [])
 
@@ -314,7 +452,7 @@ export default function AdminMenu(): React.JSX.Element {
                             
                             <div className="flex justify-between items-center mt-8 gap-4">
                                 {selectedProduct && (
-                                    <button type="button" onClick={() => handleDeleteProduct(selectedProduct, activeCategoryIndex)} className="text-red-500 font-bold hover:underline text-sm">Delete Item</button>
+                                    <button type="button" onClick={() => handleDeleteProduct(selectedProduct)} className="text-red-500 font-bold hover:underline text-sm">Delete Item</button>
                                 )}
                                 <div className="flex gap-3 ml-auto">
                                     <button type="button" onClick={() => setIsProductModalOpen(false)} className="px-6 py-3 font-bold text-gray-400">Cancel</button>
