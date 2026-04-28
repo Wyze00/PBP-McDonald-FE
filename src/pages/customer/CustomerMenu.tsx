@@ -34,7 +34,36 @@ export default function CustomerMenu(): React.JSX.Element {
                 const response = await fetch('/api/categories?include=products');
                 if (response.ok) {
                     const { data } = await response.json() as ResponseData<CategoryIncludeProducts[]>;
-                    setCip(data);
+                    
+                    const filteredCip = data.filter((cip) => {
+                        const now = new Date();
+
+                        if (cip.products.length === 0) {
+                            return false;
+                        }
+
+                        if (cip.startDate && cip.endDate) {
+                            const start = new Date(cip.startDate);
+                            const end = new Date(cip.endDate);
+                            
+                            const current = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                            if (current < start || current > end) return false;
+                        }
+
+                        if (cip.startTime && cip.endTime) {
+                            const start = new Date(cip.startTime);
+                            const end = new Date(cip.endTime);
+                            const currentTimeStr = now.toTimeString().slice(0, 5);
+                            const startTimeStr = start.toTimeString().slice(0, 5);
+                            const endTimeStr = end.toTimeString().slice(0, 5);
+
+                            if (currentTimeStr < startTimeStr || currentTimeStr > endTimeStr) return false;
+                        }
+
+                        return true; 
+                    });
+
+                    setCip(filteredCip);
                 } else {
                     const { error } = await response.json() as ResponseError;
                     setError(error);
@@ -86,7 +115,33 @@ export default function CustomerMenu(): React.JSX.Element {
                 </aside>
 
                 <section className="flex-1 p-8 overflow-y-auto">
-                    <h1 className="text-3xl font-black text-gray-800 mb-8">{activeCategory?.name || 'Menu'}</h1>
+                    <div className="mb-8">
+                        <h1 className={`text-3xl font-black text-gray-800 ${(activeCategory?.startDate || activeCategory?.endDate || activeCategory?.startTime || activeCategory?.endTime) ? 'mb-2' : ''}`}>{activeCategory?.name || 'Menu'}</h1>
+                        {(activeCategory?.startDate || activeCategory?.endDate || activeCategory?.startTime || activeCategory?.endTime) && (
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
+                                {(activeCategory.startDate || activeCategory.endDate) && (
+                                    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl">
+                                        <span className="font-bold text-gray-700 text-xs uppercase tracking-wider">Periode:</span>
+                                        <span>
+                                            {activeCategory.startDate ? new Date(activeCategory.startDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                                            {' s/d '}
+                                            {activeCategory.endDate ? new Date(activeCategory.endDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                                        </span>
+                                    </div>
+                                )}
+                                {(activeCategory.startTime || activeCategory.endTime) && (
+                                    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl">
+                                        <span className="font-bold text-gray-700 text-xs uppercase tracking-wider">Jam:</span>
+                                        <span>
+                                            {activeCategory.startTime ? new Date(activeCategory.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                                            {' - '}
+                                            {activeCategory.endTime ? new Date(activeCategory.endTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {activeCategory?.products.map((product) => (
                             <div

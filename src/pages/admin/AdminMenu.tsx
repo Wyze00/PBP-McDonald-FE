@@ -27,7 +27,11 @@ export default function AdminMenu(): React.JSX.Element {
 
     const [selectedCategory, setSelectedCategory] = useImmer<Category>({
         id: '',
-        name: ''
+        name: '',
+        endDate: '',
+        endTime: '',
+        startDate: '',
+        startTime: '',
     });
 
     useEffect(() => {
@@ -39,6 +43,7 @@ export default function AdminMenu(): React.JSX.Element {
 
                 if (response.ok) {
                     const { data } = await response.json() as ResponseData<CategoryIncludeProducts[]>;
+                    console.log(data);
                     setCip(data);
                 } else {
                     const { error } = await response.json() as ResponseError;
@@ -81,10 +86,20 @@ export default function AdminMenu(): React.JSX.Element {
         if (category === null) {
             setSelectedCategory({
                 id: '',
-                name: ''
+                name: '',
+                endDate: '',
+                endTime: '',
+                startDate: '',
+                startTime: '',
             }) 
         } else {
-            setSelectedCategory(category);
+            setSelectedCategory({
+                ...category,
+                startDate: category.startDate ? new Date(category.startDate).toISOString().split('T')[0] : null,
+                endDate: category.endDate ? new Date(category.endDate).toISOString().split('T')[0] : null,
+                startTime: category.startTime ? new Date(category.startTime).toTimeString().slice(0, 5) : null,
+                endTime: category.endTime ? new Date(category.endTime).toTimeString().slice(0, 5) : null,
+            });
         }
 
         setIsCategoryModalOpen(true);
@@ -104,7 +119,11 @@ export default function AdminMenu(): React.JSX.Element {
                             'Content-Type': 'Application/json'
                         },
                         body: JSON.stringify({
-                            name: category.name
+                            name: category.name,
+                            startDate: category.startDate || null,
+                            endDate: category.endDate || null,
+                            startTime: category.startTime || null,
+                            endTime: category.endTime || null,
                         }),
                         credentials: 'include',
                     })
@@ -113,11 +132,12 @@ export default function AdminMenu(): React.JSX.Element {
                         const { data } = await response.json() as ResponseData<Category>;
 
                         setCip((draft) => {
-                            draft.push({
-                                id: data.id,
-                                name: data.name,
-                                products: [],
-                            })
+                            draft.push(
+                                {
+                                    ...data,
+                                    products: [],
+                                }
+                            )
                         })
 
                     } else {
@@ -143,6 +163,10 @@ export default function AdminMenu(): React.JSX.Element {
                         },
                         body: JSON.stringify({
                             name: category.name,
+                            startDate: category.startDate || null,
+                            endDate: category.endDate || null,
+                            startTime: category.startTime || null,
+                            endTime: category.endTime || null,
                         }),
                         credentials: 'include',
                     })
@@ -157,6 +181,10 @@ export default function AdminMenu(): React.JSX.Element {
                             });
 
                             draft[index].name = data.name;
+                            draft[index].startDate = data.startDate;
+                            draft[index].endDate = data.endDate;
+                            draft[index].startTime = data.startTime;
+                            draft[index].endTime = data.endTime;
                         })
                     } else {
                         const { error } = await response.json() as ResponseError;
@@ -466,16 +494,75 @@ export default function AdminMenu(): React.JSX.Element {
 
             {isCategoryModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-md w-full max-w-sm p-8 shadow-2xl">
-                        <h2 className="text-2xl font-black mb-6 text-gray-800">{selectedCategory ? 'Edit Category' : 'New Category'}</h2>
-                        <input type="text" onChange={(e) => setSelectedCategory((draft) => {draft.name = e.target.value})} placeholder="Category Name" defaultValue={selectedCategory?.name} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" />
-                        <div className="flex justify-between items-center mt-8 gap-4">
-                            {selectedCategory && (
-                                <button type="button" onClick={() => handleDeleteCategory(selectedCategory)} className="text-red-500 font-bold hover:underline text-sm">Delete</button>
-                            )}
-                            <div className="flex gap-3 ml-auto">
-                                <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="px-6 py-3 font-bold text-gray-400">Cancel</button>
-                                <button type="submit" onClick={() => handleSaveCategory(selectedCategory)} className="px-8 py-3 bg-[#DA291C] text-white rounded-full font-bold">Save</button>
+                    <div className="bg-white rounded-md w-full max-w-md p-8 shadow-2xl">
+                        <h2 className="text-2xl font-black mb-6 text-gray-800">{selectedCategory.id ? 'Edit Category' : 'New Category'}</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="categoryName" className="block text-sm font-bold text-gray-700 mb-1">Category Name</label>
+                                <input 
+                                    type="text" 
+                                    id="categoryName"
+                                    onChange={(e) => setSelectedCategory((draft) => {draft.name = e.target.value})} 
+                                    placeholder="Category Name" 
+                                    defaultValue={selectedCategory?.name} 
+                                    className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
+                                />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="startDate" className="block text-sm font-bold text-gray-700 mb-1">Start Date</label>
+                                    <input 
+                                        type="date" 
+                                        id="startDate"
+                                        onChange={(e) => setSelectedCategory((draft) => {draft.startDate = e.target.value || null})} 
+                                        defaultValue={selectedCategory?.startDate || ''} 
+                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="endDate" className="block text-sm font-bold text-gray-700 mb-1">End Date</label>
+                                    <input 
+                                        type="date" 
+                                        id="endDate"
+                                        onChange={(e) => setSelectedCategory((draft) => {draft.endDate = e.target.value || null})} 
+                                        defaultValue={selectedCategory?.endDate || ''} 
+                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="startTime" className="block text-sm font-bold text-gray-700 mb-1">Start Time</label>
+                                    <input 
+                                        type="time" 
+                                        id="startTime"
+                                        onChange={(e) => setSelectedCategory((draft) => {draft.startTime = e.target.value || null})} 
+                                        defaultValue={selectedCategory?.startTime || ''} 
+                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="endTime" className="block text-sm font-bold text-gray-700 mb-1">End Time</label>
+                                    <input 
+                                        type="time" 
+                                        id="endTime"
+                                        onChange={(e) => setSelectedCategory((draft) => {draft.endTime = e.target.value || null})} 
+                                        defaultValue={selectedCategory?.endTime || ''} 
+                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center mt-8 gap-4">
+                                {selectedCategory.id && (
+                                    <button type="button" onClick={() => handleDeleteCategory(selectedCategory)} className="text-red-500 font-bold hover:underline text-sm">Delete</button>
+                                )}
+                                <div className="flex gap-3 ml-auto">
+                                    <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="px-6 py-3 font-bold text-gray-400">Cancel</button>
+                                    <button type="submit" onClick={() => handleSaveCategory(selectedCategory)} className="px-8 py-3 bg-[#DA291C] text-white rounded-full font-bold">Save</button>
+                                </div>
                             </div>
                         </div>
                     </div>
