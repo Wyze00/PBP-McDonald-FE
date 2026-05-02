@@ -162,13 +162,24 @@ export default function KitchenPage() {
                       onClick={() => updateStatus(order.id, "READY")}
                       className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 rounded-xl transition-transform active:scale-95"
                     >
-                      Mark Ready
+                      Mark Ongoing
                     </button>
                     <button
                       onClick={() => updateStatus(order.id, "COMPLETED")}
                       className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-transform active:scale-95"
                     >
                       Complete
+                    </button>
+                  </div>
+                )}
+
+                {tab === "completed" && (
+                  <div className="p-4 bg-gray-50 border-t flex gap-3">
+                    <button
+                      onClick={() => updateStatus(order.id, "READY")}
+                      className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 rounded-xl transition-transform active:scale-95"
+                    >
+                      Set As Ongoing
                     </button>
                   </div>
                 )}

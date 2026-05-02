@@ -15,7 +15,7 @@ export default function AdminMenu(): React.JSX.Element {
 
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-    
+
     const [selectedProduct, setSelectedProduct] = useImmer<Product>({
         id: '',
         name: '',
@@ -91,7 +91,7 @@ export default function AdminMenu(): React.JSX.Element {
                 endTime: '',
                 startDate: '',
                 startTime: '',
-            }) 
+            })
         } else {
             setSelectedCategory({
                 ...category,
@@ -105,12 +105,29 @@ export default function AdminMenu(): React.JSX.Element {
         setIsCategoryModalOpen(true);
     }, []);
 
-    const handleSaveCategory = useCallback((category : Category) => {
+    const handleSaveCategory = useCallback((category: Category) => {
         setError('');
+
+        const hasStartDate = Boolean(category.startDate);
+        const hasEndDate = Boolean(category.endDate);
+
+        if (hasStartDate !== hasEndDate) {
+            setError('Start Date and End Date must either be both set or both empty.');
+            return; // Stop execution
+        }
+
+        const hasStartTime = Boolean(category.startTime);
+        const hasEndTime = Boolean(category.endTime);
+
+        if (hasStartTime !== hasEndTime) {
+            setError('Start Time and End Time must either be both set or both empty.');
+            return; // Stop execution
+        }
+
         setLoading(true);
 
         if (category.id === '') {
-            
+
             (async () => {
                 try {
                     const response = await customFetch(`/api/categories`, {
@@ -143,7 +160,7 @@ export default function AdminMenu(): React.JSX.Element {
                     } else {
                         const { error } = await response.json() as ResponseError;
                         setError(error);
-                    }  
+                    }
 
                 } catch (error) {
                     setError('Gagal create data category');
@@ -189,8 +206,8 @@ export default function AdminMenu(): React.JSX.Element {
                     } else {
                         const { error } = await response.json() as ResponseError;
                         setError(error);
-                    } 
-                    
+                    }
+
                 } catch (error) {
                     setError('Gagal update data category');
                 } finally {
@@ -212,13 +229,13 @@ export default function AdminMenu(): React.JSX.Element {
                     method: 'DELETE',
                     credentials: 'include',
                 })
-    
+
                 if (response.ok) {
                     setCip((draft) => {
                         const index = draft.findIndex((draftCategory) => {
                             return category.id === draftCategory.id;
                         });
-    
+
                         draft.splice(index, 1);
                     })
 
@@ -226,9 +243,9 @@ export default function AdminMenu(): React.JSX.Element {
                     const { error } = await response.json() as ResponseError;
                     setError(error);
                 }
-                
+
             } catch (error) {
-                setError('Gagal menghapus data category');                
+                setError('Gagal menghapus data category');
             } finally {
                 setLoading(false);
             }
@@ -242,7 +259,7 @@ export default function AdminMenu(): React.JSX.Element {
         setLoading(true);
 
         if (product.id === '') {
-            
+
             (async () => {
                 try {
                     const response = await customFetch(`/api/products`, {
@@ -281,11 +298,11 @@ export default function AdminMenu(): React.JSX.Element {
                     } else {
                         const { error } = await response.json() as ResponseError;
                         setError(error);
-                    }  
+                    }
 
                 } catch (error) {
                     console.log(error);
-                    setError('Gagal create data category');
+                    setError('Gagal create data product');
                 } finally {
                     setLoading(false);
                 }
@@ -334,8 +351,8 @@ export default function AdminMenu(): React.JSX.Element {
                     } else {
                         const { error } = await response.json() as ResponseError;
                         setError(error);
-                    } 
-                    
+                    }
+
                 } catch (error) {
                     console.log(error);
                     setError('Gagal update data category');
@@ -346,7 +363,7 @@ export default function AdminMenu(): React.JSX.Element {
         }
 
         setIsProductModalOpen(false);
-    }, [])
+    }, [cip])
 
     const handleDeleteProduct = useCallback((product: Product) => {
         setError('');
@@ -405,15 +422,14 @@ export default function AdminMenu(): React.JSX.Element {
                             <div key={cat.id} className="group flex items-center px-4">
                                 <button
                                     onClick={() => setActiveCategoryIndex(index)}
-                                    className={`flex-1 text-left px-4 py-3 rounded-xl font-bold transition-all ${
-                                        activeCategoryIndex === index 
-                                        ? 'text-[#FFC72C]' 
+                                    className={`flex-1 text-left px-4 py-3 rounded-xl font-bold transition-all ${activeCategoryIndex === index
+                                        ? 'text-[#FFC72C]'
                                         : 'text-gray-600'
-                                    }`}
+                                        }`}
                                 >
                                     {cat.name}
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => handleOpenCategoryModal(cat)}
                                     className="ml-2 p-2 opacity-0 group-hover:opacity-100 text-xs bg-gray-200 rounded-md hover:bg-gray-300 transition"
                                 >
@@ -422,7 +438,7 @@ export default function AdminMenu(): React.JSX.Element {
                             </div>
                         ))}
                     </nav>
-                    <button 
+                    <button
                         onClick={() => handleOpenCategoryModal(null)}
                         className="m-4 p-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 font-bold hover:border-[#DA291C] hover:text-[#DA291C] transition-all"
                     >
@@ -438,7 +454,7 @@ export default function AdminMenu(): React.JSX.Element {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {activeCategory?.products.map((product) => (
-                            <div 
+                            <div
                                 key={product.id}
                                 onClick={() => handleOpenProductModal(product)}
                                 className="group bg-white hover:rounded-xl p-4 shadow-sm hover:shadow-xl transition-all cursor-pointer border border-transparent"
@@ -452,7 +468,7 @@ export default function AdminMenu(): React.JSX.Element {
                         ))}
 
                         {/* Add Product Card */}
-                        <button 
+                        <button
                             onClick={() => handleOpenProductModal(null)}
                             className="aspect-square flex flex-col items-center justify-center border-4 border-dashed border-gray-200 rounded-xl text-gray-300 hover:text-[#DA291C] hover:border-[#DA291C] transition-all"
                         >
@@ -467,17 +483,17 @@ export default function AdminMenu(): React.JSX.Element {
             {isProductModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <div className="bg-white rounded-md w-full max-w-md p-8 shadow-2xl relative overflow-hidden">
-                        <h2 className="text-2xl font-black mb-6 text-gray-800">{selectedProduct ? 'Update Item' : 'New Menu Item'}</h2>
+                        <h2 className="text-2xl font-black mb-6 text-gray-800">{selectedProduct.id ? 'Update Item' : 'New Menu Item'}</h2>
                         <div className="space-y-4">
                             <label htmlFor="imageUrl">Image URL</label>
-                            <input type="text" onChange={(e) => setSelectedProduct((draft) => {draft.imageUrl = e.target.value})} id="imageUrl" placeholder="imageUrl" defaultValue={selectedProduct?.imageUrl} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" />
+                            <input type="text" onChange={(e) => setSelectedProduct((draft) => { draft.imageUrl = e.target.value })} id="imageUrl" placeholder="imageUrl" defaultValue={selectedProduct?.imageUrl} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" />
                             <label htmlFor="name">Name</label>
-                            <input type="text" onChange={(e) => setSelectedProduct((draft) => {draft.name = e.target.value})} id="name" placeholder="Name" defaultValue={selectedProduct?.name} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" />
+                            <input type="text" onChange={(e) => setSelectedProduct((draft) => { draft.name = e.target.value })} id="name" placeholder="Name" defaultValue={selectedProduct?.name} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" />
                             <label htmlFor="price">Price</label>
-                            <input type="number" onChange={(e) => setSelectedProduct((draft) => {draft.price = Number(e.target.value)})} id="price" placeholder="Price" defaultValue={selectedProduct?.price} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" />
+                            <input type="number" onChange={(e) => setSelectedProduct((draft) => { draft.price = Number(e.target.value) })} id="price" placeholder="Price" defaultValue={selectedProduct?.price} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" />
                             <label htmlFor="descriptioon">Description</label>
-                            <textarea id="description" onChange={(e) => setSelectedProduct((draft) => {draft.description = e.target.value})} placeholder="Description" defaultValue={selectedProduct?.description} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C] h-24" />
-                            
+                            <textarea id="description" onChange={(e) => setSelectedProduct((draft) => { draft.description = e.target.value })} placeholder="Description" defaultValue={selectedProduct?.description} className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C] h-24" />
+
                             <div className="flex justify-between items-center mt-8 gap-4">
                                 {selectedProduct && (
                                     <button type="button" onClick={() => handleDeleteProduct(selectedProduct)} className="text-red-500 font-bold hover:underline text-sm">Delete Item</button>
@@ -499,59 +515,77 @@ export default function AdminMenu(): React.JSX.Element {
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="categoryName" className="block text-sm font-bold text-gray-700 mb-1">Category Name</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     id="categoryName"
-                                    onChange={(e) => setSelectedCategory((draft) => {draft.name = e.target.value})} 
-                                    placeholder="Category Name" 
-                                    defaultValue={selectedCategory?.name} 
-                                    className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
+                                    onChange={(e) => setSelectedCategory((draft) => { draft.name = e.target.value })}
+                                    placeholder="Category Name"
+                                    defaultValue={selectedCategory?.name}
+                                    className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]"
                                 />
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="startDate" className="block text-sm font-bold text-gray-700 mb-1">Start Date</label>
-                                    <input 
-                                        type="date" 
-                                        id="startDate"
-                                        onChange={(e) => setSelectedCategory((draft) => {draft.startDate = e.target.value || null})} 
-                                        defaultValue={selectedCategory?.startDate || ''} 
-                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="endDate" className="block text-sm font-bold text-gray-700 mb-1">End Date</label>
-                                    <input 
-                                        type="date" 
-                                        id="endDate"
-                                        onChange={(e) => setSelectedCategory((draft) => {draft.endDate = e.target.value || null})} 
-                                        defaultValue={selectedCategory?.endDate || ''} 
-                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
-                                    />
-                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="startTime" className="block text-sm font-bold text-gray-700 mb-1">Start Time</label>
-                                    <input 
-                                        type="time" 
-                                        id="startTime"
-                                        onChange={(e) => setSelectedCategory((draft) => {draft.startTime = e.target.value || null})} 
-                                        defaultValue={selectedCategory?.startTime || ''} 
-                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
+                                    <label htmlFor="startDate" className="block text-sm font-bold text-gray-700 mb-1">Start Date</label>
+                                    <input
+                                        type="date"
+                                        id="startDate"
+                                        onChange={(e) => setSelectedCategory((draft) => { draft.startDate = e.target.value || null })}
+                                        defaultValue={selectedCategory?.startDate || ''}
+                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="endTime" className="block text-sm font-bold text-gray-700 mb-1">End Time</label>
-                                    <input 
-                                        type="time" 
-                                        id="endTime"
-                                        onChange={(e) => setSelectedCategory((draft) => {draft.endTime = e.target.value || null})} 
-                                        defaultValue={selectedCategory?.endTime || ''} 
-                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]" 
+                                    <label htmlFor="endDate" className="block text-sm font-bold text-gray-700 mb-1">End Date</label>
+                                    <input
+                                        type="date"
+                                        id="endDate"
+                                        onChange={(e) => setSelectedCategory((draft) => { draft.endDate = e.target.value || null })}
+                                        defaultValue={selectedCategory?.endDate || ''}
+                                        className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]"
                                     />
+                                </div>
+                            </div>
+
+                            <div className="mt-4">
+                                <div className="flex justify-between items-end mb-1">
+                                    <label className="block text-sm font-bold text-gray-700">Time Period</label>
+
+                                    {/* CLEAR BUTTON LOGIC */}
+                                    {(selectedCategory.startTime || selectedCategory.endTime) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedCategory(draft => {
+                                                draft.startTime = null;
+                                                draft.endTime = null;
+                                            })}
+                                            className="text-xs text-red-500 font-bold hover:underline"
+                                        >
+                                            Clear Time
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <input
+                                            type="time"
+                                            id="startTime"
+                                            onChange={(e) => setSelectedCategory((draft) => { draft.startTime = e.target.value || null })}
+                                            value={selectedCategory?.startTime || ''} /* CHANGED FROM defaultValue */
+                                            className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]"
+                                        />
+                                    </div>
+                                    <div>
+                                        <input
+                                            type="time"
+                                            id="endTime"
+                                            onChange={(e) => setSelectedCategory((draft) => { draft.endTime = e.target.value || null })}
+                                            value={selectedCategory?.endTime || ''}  /* CHANGED FROM defaultValue */
+                                            className="w-full p-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#DA291C]"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

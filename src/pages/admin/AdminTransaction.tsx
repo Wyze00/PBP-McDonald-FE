@@ -134,7 +134,7 @@ export default function AdminTransaction(): React.JSX.Element {
                             <tr className="bg-gray-50 border-b border-gray-100">
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Order #</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Method</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Total</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Total After Tax</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Trx Status</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Order Status</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Action</th>
@@ -222,7 +222,7 @@ export default function AdminTransaction(): React.JSX.Element {
 
                         <div className="p-8 bg-gray-50 border-t border-gray-100">
                             <div className="flex justify-between items-center mb-6">
-                                <span className="text-gray-500 font-bold uppercase text-xs tracking-widest">Grand Total</span>
+                                <span className="text-gray-500 font-bold uppercase text-xs tracking-widest">Sub Total</span>
                                 <span className="text-2xl font-black text-[#DA291C]">
                                     Rp {orderProducts.reduce((sum, op) => sum + (op.product.price * op.quantity), 0).toLocaleString()}
                                 </span>
